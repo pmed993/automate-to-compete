@@ -1,0 +1,71 @@
+SELECT
+    f.costat,
+    f.curcd,
+    f.fyear,
+    f.datafmt,
+    f.indfmt,
+    f.popsrc,
+    f.consol,
+    f.gvkey,
+    f.datadate,
+    EXTRACT(YEAR FROM f.datadate) AS cyear,
+    f.tic,
+    f.exchg,
+
+    c.cik,
+    c.conm,
+    c.naics,
+    c.sic,
+    c.fic,
+    c.loc,
+    c.incorp,
+    c.state,
+    first_obs.first_compustat_fyear,
+
+
+    f.act,
+    f.at,
+    f.che,
+    f.csho,
+    f.dlc,
+    f.dltt,
+    f.dv,
+    f.intan,
+    f.ni,
+    f.xrd,
+    f.xsga,
+    f.capx,
+    f.oancf,
+    f.prstkc,
+    f.prcc_f,
+    f.tstk,
+    f.sale,
+    f.emp,
+    f.xlr,
+    f.oibdp,
+    f.xopr
+    
+
+FROM comp.funda AS f
+
+LEFT JOIN comp.company AS c
+    ON f.gvkey = c.gvkey
+
+LEFT JOIN (
+    SELECT
+        gvkey,
+        MIN(fyear) AS first_compustat_fyear
+    FROM comp.funda
+    WHERE fyear IS NOT NULL
+    GROUP BY gvkey
+) AS first_obs
+    ON f.gvkey = first_obs.gvkey
+
+WHERE f.indfmt = 'INDL'
+  AND f.datafmt = 'STD'
+  AND f.popsrc = 'D'
+  AND f.consol = 'C'
+  AND f.costat = 'A'
+  AND f.datadate >= '2015-01-01'
+  AND c.naics IS NOT NULL
+  AND c.fic = 'USA';
